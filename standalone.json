@@ -1,0 +1,167 @@
+{
+  "variables": {
+    "iso_url": "OSX_InstallESD_10.11.1_15B42.dmg",
+    "provisioning_delay": "0",
+    "username": "vagrant",
+    "password": "vagrant",
+    "autologin": "false",
+    "update_system": "true",
+    "install_xcode_cli_tools": "true",
+
+    "chef_version": "none",
+    "facter_version": "none",
+    "hiera_version": "none",
+    "puppet_version": "none",
+    "puppet_agent_version": "none"
+  },
+
+  "builders": [
+    {
+      "vm_name": "osx-standalone-parallels",
+      "type": "parallels-iso",
+      "guest_os_type": "win-8",
+      "parallels_tools_flavor": "mac",
+
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "none",
+
+      "ssh_username": "{{user `username`}}",
+      "ssh_password": "{{user `password`}}",
+      "ssh_wait_timeout": "10000s",
+
+      "boot_wait": "5s",
+      "disk_size": 40960,
+
+      "shutdown_command": "echo '{{user `username`}}'|sudo -S shutdown -h now",
+
+      "keep_registered": true,
+
+      "prlctl": [
+        ["set", "{{.Name}}", "--memsize", "2048"],
+        ["set", "{{.Name}}", "--memquota", "512:2048"],
+        ["set", "{{.Name}}", "--cpus", "2"],
+        ["set", "{{.Name}}", "--distribution", "macosx"],
+        ["set", "{{.Name}}", "--3d-accelerate", "highest"],
+        ["set", "{{.Name}}", "--high-resolution", "off"],
+        ["set", "{{.Name}}", "--auto-share-camera", "off"],
+        ["set", "{{.Name}}", "--auto-share-bluetooth", "off"],
+        ["set", "{{.Name}}", "--on-window-close", "keep-running"],
+        ["set", "{{.Name}}", "--shf-host", "off"]
+      ]
+    },
+    {
+      "vm_name": "osx-standalone-vmware",
+      "type": "vmware-iso",
+      "guest_os_type": "darwin12-64",
+      "tools_upload_flavor": "darwin",
+
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "none",
+
+      "ssh_username": "{{user `username`}}",
+      "ssh_password": "{{user `password`}}",
+      "ssh_wait_timeout": "10000s",
+
+      "boot_wait": "2s",
+      "disk_size": 40960,
+
+      "shutdown_command": "echo '{{user `username`}}'|sudo -S shutdown -h now",
+
+      "keep_registered": true,
+      "skip_compaction": true,
+
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1",
+        "memsize": "2048",
+        "numvcpus": "1",
+        "firmware": "efi",
+        "keyboardAndMouseProfile": "macProfile",
+        "smc.present": "TRUE",
+        "hpet0.present": "TRUE",
+        "ich7m.present": "TRUE",
+        "ehci.present": "TRUE",
+        "usb.present": "TRUE"
+      }
+    },
+    {
+      "vm_name": "osx-standalone-virtualbox",
+      "type": "virtualbox-iso",
+      "guest_os_type": "MacOS1011_64",
+      "guest_additions_mode": "disable",
+
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "none",
+
+      "ssh_username": "{{user `username`}}",
+      "ssh_password": "{{user `password`}}",
+
+      "ssh_wait_timeout": "10000s",
+      "boot_wait": "2s",
+      "disk_size": 40960,
+      "iso_interface": "sata",
+      "hard_drive_interface": "sata",
+
+      "shutdown_command": "echo '{{user `username`}}'|sudo -S shutdown -h now",
+
+      "keep_registered": true,
+
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--audiocontroller", "hda"],
+        ["modifyvm", "{{.Name}}", "--boot1", "dvd"],
+        ["modifyvm", "{{.Name}}", "--boot2", "disk"],
+        ["modifyvm", "{{.Name}}", "--chipset", "ich9"],
+        ["modifyvm", "{{.Name}}", "--firmware", "efi"],
+        ["modifyvm", "{{.Name}}", "--hpet", "on"],
+        ["modifyvm", "{{.Name}}", "--keyboard", "usb"],
+        ["modifyvm", "{{.Name}}", "--memory", "2048"],
+        ["modifyvm", "{{.Name}}", "--mouse", "usbtablet"],
+        ["modifyvm", "{{.Name}}", "--usbehci", "on"],
+        ["modifyvm", "{{.Name}}", "--vram", "128"],
+        ["storagectl", "{{.Name}}", "--name", "IDE Controller", "--remove"]
+      ]
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "command": "sleep {{user `provisioning_delay`}}"
+    },
+    {
+      "destination": "/private/tmp/set_kcpassword.py",
+      "source": "scripts/support/set_kcpassword.py",
+      "type": "file"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "USERNAME={{user `username`}}",
+        "PASSWORD={{user `password`}}",
+        "AUTOLOGIN={{user `autologin`}}",
+        "UPDATE_SYSTEM={{user `update_system`}}",
+        "INSTALL_XCODE_CLI_TOOLS={{user `install_xcode_cli_tools`}}",
+        "CHEF_VERSION={{user `chef_version`}}",
+        "FACTER_VERSION={{user `facter_version`}}",
+        "HIERA_VERSION={{user `hiera_version`}}",
+        "PUPPET_VERSION={{user `puppet_version`}}",
+        "PUPPET_AGENT_VERSION={{user `puppet_agent_version`}}"
+      ],
+      "scripts": [
+        "scripts/post-install.sh",
+        "scripts/vmware.sh",
+        "scripts/parallels.sh",
+
+        "scripts/xcode-cli-tools.sh",
+        "scripts/chef-omnibus.sh",
+        "scripts/puppet.sh",
+
+        "scripts/add-network-interface-detection.sh",
+        "scripts/autologin.sh",
+        "scripts/system-update.sh",
+        "scripts/shrink.sh"
+      ],
+
+      "execute_command": "chmod +x {{ .Path }}; sudo {{ .Vars }} {{ .Path }}"
+    }
+  ]
+}
