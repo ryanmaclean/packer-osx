@@ -14,8 +14,7 @@
       "parallels_tools_flavor": "mac",
       "type": "parallels-iso",
       "prlctl": [
-        ["set", "{{.Name}}", "--memsize", "2048"],
-        ["set", "{{.Name}}", "--memquota", "512:2048"],
+        ["set", "{{.Name}}", "--memsize", "4096"],
         ["set", "{{.Name}}", "--cpus", "2"],
         ["set", "{{.Name}}", "--distribution", "macosx"],
         ["set", "{{.Name}}", "--3d-accelerate", "highest"],
@@ -42,8 +41,8 @@
       "type": "vmware-iso",
       "vmx_data": {
         "cpuid.coresPerSocket": "1",
-        "memsize": "2048",
-        "numvcpus": "1",
+        "memsize": "4096",
+        "numvcpus": "2",
         "firmware": "efi",
         "keyboardAndMouseProfile": "macProfile",
         "smc.present": "TRUE",
@@ -76,7 +75,8 @@
         ["modifyvm", "{{.Name}}", "--firmware", "efi"],
         ["modifyvm", "{{.Name}}", "--hpet", "on"],
         ["modifyvm", "{{.Name}}", "--keyboard", "usb"],
-        ["modifyvm", "{{.Name}}", "--memory", "2048"],
+        ["modifyvm", "{{.Name}}", "--memory", "4096"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"]
         ["modifyvm", "{{.Name}}", "--mouse", "usbtablet"],
         ["modifyvm", "{{.Name}}", "--usbehci", "on"],
         ["modifyvm", "{{.Name}}", "--vram", "128"],
