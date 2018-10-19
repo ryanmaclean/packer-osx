@@ -6,8 +6,8 @@ installation of OS X. It's based off of [timsutton/osx-vm-templates][].
 ## Usage
 
 This set of scripts supports all versions of OS X that are distributed through
-the App Store: OS X Lion (10.7) through El Capitan (10.11), and macOS Sierra
-(10.12).
+the App Store: OS X Lion (10.7) through High Sierra (10.13), and macOS Mojave
+(10.14).
 
 This fork has a few templates to support different use cases:
 
